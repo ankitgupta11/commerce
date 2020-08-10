@@ -11,10 +11,76 @@ body {
 	float: left;
 }
 
+.header .logo h1 {
+	line-height: 1.1;
+	margin-left: 10px;
+}
+
 .header .nav {
 	float: right;
+	margin-top: 3px;
 }
 
 .section {
 	clear: both;
+	padding: 10px;
+}
+
+.section h2 {
+	margin: 5px 0 15px 0;
+}
+
+ul.listings {
+	list-style: none;
+    padding: 0;
+}
+
+ul.listings a:hover {
+	text-decoration: none;
+}
+
+ul.listings div.listing {
+	width: 100%;
+    height: 200px;
+    color: #000;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+ul.listings .image-container {
+	width: 33%;
+	margin-right: 50px;
+	background-color: #eee;
+	float: left;
+	text-align: center;
+	height: 100%;
+}
+
+ul.listings img {
+	height: 100%;
+	max-width: 100%;
+	object-fit: contain;
+}
+
+.image-container-large {
+	width: 75%;
+	background-color: #eee;
+	text-align: center;
+	height: 300px;
+}
+
+.image-container-large img {
+	height: 100%;
+	max-width: 100%;
+	object-fit: contain;
+}
+
+#in_watchlist {
+	background-color: blue;
+	color: white;
+}
+
+#not_in_watchlist {
+	background-color: grey;
+	color: black;
 }

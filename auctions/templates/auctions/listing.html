@@ -5,12 +5,56 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Listing</h1>
-
-    <p>{{ listing.title }}</p>
+    <h2>Listing : {{ listing.title }}</h2>
+    {% if own_listing %}
+        <div class="close">
+            <form action="{% url 'close_listing' listing.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Close">
+            </form>
+        </div>
+    {% endif %}
+    {% if user.is_authenticated %}
+        <div class="watchlist">
+            <form action="{% url 'toggle_watchlist' listing.id %}" method="post">
+                {% csrf_token %}
+                {% if in_watchlist %}
+                    <input type="submit" value="Watchlist" id="in_watchlist">
+                {% else %}
+                    <input type="submit" value="Watchlist" id="not_in_watchlist">
+                {% endif %}
+            </form>
+        </div>
+    {% endif %}
+    <div class="image-container-large"><img src="{{ listing.image }}"></div>
     <p>{{ listing.description }}</p>
-    <p>{{ listing.starting_bid }}</p>
-    <p>{{ listing.duration }}</p>
-    <p><img src="{{ listing.image }}"></p>
-
+    <p>{{ listing.price }}</p>
+    {% if user.is_authenticated %}
+        <div class="form">
+            <p>{{ bid_count }} bid(s) so far. Your bid is the current bid</p>
+            <form action="{% url 'listing' listing.id %}" method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="fieldWrapper">
+                        {{ field.label_tag }} {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <input type="submit" value="Place Bid">
+            </form>
+        </div>
+    {% endif %}
+    <div class="details">
+        <h5>Details:</h5>
+        <ul>
+            <li>Listed by: {{ listing.user }}</li>
+            <li>Category:
+                {% if listing.category %}
+                    {{ listing.category }}
+                {% else %}
+                    No category selected.
+                {% endif %}
+            </li>
+        </ul>
+    </div>
 {% endblock %}

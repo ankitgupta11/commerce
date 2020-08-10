@@ -1,7 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    <h2>Watchlist</h2>
     {% if count %}
 	    <ul class="listings">
 	        {% for listing in listings %}
@@ -19,6 +19,6 @@
 	        {% endfor %}
 	    </ul>
     {% else %}
-        <p>No active items at present.</p>
+        <p>No items in your watchlist at present.</p>
     {% endif %}
 {% endblock %}

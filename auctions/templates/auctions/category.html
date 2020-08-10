@@ -1,0 +1,24 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Category - {{ name }}</h2>
+    {% if count %}
+        <ul class="listings">
+            {% for listing in listings %}
+                <li>
+                    <a href="{% url 'listing' listing.id %}">
+                        <div class="listing">
+                        	<div class="image-container"><img src="{{ listing.image }}"></div>
+                        	<p>{{ listing.title }}</p>
+                        	<p>{{ listing.price }}</p>
+                        	<p>{{ listing.description }}</p>
+                        	<p>{{ listing.created_at }}</p>
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>This category has no active items at present.</p>
+    {% endif %}
+{% endblock %}
