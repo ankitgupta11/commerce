@@ -41,7 +41,12 @@
         <p><big>${{ listing.price }}</big></p>
         {% if user.is_authenticated and listing.active and not own_listing %}
             <div class="form">
-                <small>{{ bid_count }} bid(s) so far. Your bid is the current bid</small>
+                <small>
+                    {{ bid_count }} bid(s) so far.
+                    {% if current_bid %}
+                        Your bid is the current bid
+                    {% endif %}
+                </small>
                 <form action="{% url 'listing' listing.id %}" method="post">
                     {% csrf_token %}
                     {% for field in bid_form %}

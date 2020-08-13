@@ -137,10 +137,11 @@ def listing(request, listing_id):
                     "own_listing": own_listing(user=request.user, listing=listing),
                     "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else "",
                     "comments": listing.comments.order_by("-created_at"),
-                    "comment_form": CommentForm
+                    "comment_form": CommentForm,
+                    "current_bid": listing.bids.last() and listing.bids.last().user == request.user
                 })
     except Listing.DoesNotExist:
-        raise Http404("Listing not found.")
+        return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "bid_count": listing.bids.all().count(),
@@ -149,7 +150,8 @@ def listing(request, listing_id):
         "in_watchlist": in_watchlist(user=request.user, listing=listing),
         "own_listing": own_listing(user=request.user, listing=listing),
         "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else "",
-        "comments": listing.comments.order_by("-created_at")
+        "comments": listing.comments.order_by("-created_at"),
+        "current_bid": listing.bids.last() and listing.bids.last().user == request.user
     })
 
 def categories(request):
@@ -205,6 +207,10 @@ def close_listing(request, listing_id):
 
             listing.active = False
             listing.save()
+
+            if in_watchlist(request.user, listing):
+                w=Watchlist.objects.get(user=request.user, listing=listing)
+                w.delete()
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))
 
 def post_comments(request, listing_id):

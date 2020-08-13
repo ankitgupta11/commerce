@@ -84,7 +84,7 @@ ul.listings div.listing {
 
 ul.listings .image-container {
 	width: 33%;
-	margin-right: 50px;
+	margin-right: 40px;
 	background-color: #eee;
 	float: left;
 	text-align: center;
@@ -291,7 +291,7 @@ div.create-listing input[type="submit"]:hover, .listing-details input[type="subm
 }
 
 .comment-list li p span{
-	color: #bbb;
+	color: #aaa;
 }
 
 .comments-section {
@@ -304,4 +304,32 @@ h5 {
 
 p.no-items {
 	margin-top: 15px;
+}
+
+ul.listings div.product-details {
+	padding: 20px 40px 20px 0;
+	height: 100%;
+}
+
+ul.listings p.product-name {
+	font-size: 20px;
+	font-weight: 500;
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+ul.listings p.product-price {
+	font-weight: 500;
+}
+
+ul.listings p.product-description {
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+ul.listings p.product-date {
+	font-size: 14px;
+	color: #777;
 }

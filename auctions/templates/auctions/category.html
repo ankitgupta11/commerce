@@ -9,10 +9,12 @@
                     <a href="{% url 'listing' listing.id %}">
                         <div class="listing">
                         	<div class="image-container"><img src="{{ listing.image }}"></div>
-                        	<p>{{ listing.title }}</p>
-                        	<p>{{ listing.price }}</p>
-                        	<p>{{ listing.description }}</p>
-                        	<p>{{ listing.created_at }}</p>
+                            <div class="product-details">
+                                <p class="product-name">{{ listing.title }}</p>
+                                <p class="product-price">Price: ${{ listing.price }}</p>
+                                <p class="product-description">{{ listing.description }}</p>
+                                <p class="product-date">Created {{ listing.created_at }}</p>
+                            </div>
                         </div>
                     </a>
                 </li>
