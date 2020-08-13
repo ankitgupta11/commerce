@@ -30,8 +30,8 @@
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
-                        <span>{{ watchlist_count }}</span>
+                        <a class="nav-link" href="{% url 'watchlist' %}">Watchlist
+                        <span class="count">{{ watchlist_count }}</span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'create_listing' %}">Create Listings</a>

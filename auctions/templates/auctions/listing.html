@@ -5,16 +5,17 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Listing : {{ listing.title }}</h2>
-    {% if own_listing %}
-        <div class="close">
+    <h2>Listing : {{ listing.title }}
+    {% if own_listing and listing.active %}
+        <div class="close-listing">
+            <span>{{ bid_count }} bid(s) so far.</span>
             <form action="{% url 'close_listing' listing.id %}" method="post">
                 {% csrf_token %}
-                <input type="submit" value="Close">
+                <input type="submit" value="CLOSE">
             </form>
         </div>
-    {% endif %}
-    {% if user.is_authenticated %}
+    {% endif %}</h2>
+    {% if user.is_authenticated and listing.active %}
         <div class="watchlist">
             <form action="{% url 'toggle_watchlist' listing.id %}" method="post">
                 {% csrf_token %}
@@ -26,35 +27,75 @@
             </form>
         </div>
     {% endif %}
-    <div class="image-container-large"><img src="{{ listing.image }}"></div>
-    <p>{{ listing.description }}</p>
-    <p>{{ listing.price }}</p>
-    {% if user.is_authenticated %}
-        <div class="form">
-            <p>{{ bid_count }} bid(s) so far. Your bid is the current bid</p>
-            <form action="{% url 'listing' listing.id %}" method="post">
-                {% csrf_token %}
-                {% for field in form %}
-                    <div class="fieldWrapper">
-                        {{ field.label_tag }} {{ field }}
-                        {{ field.errors }}
-                    </div>
-                {% endfor %}
-                <input type="submit" value="Place Bid">
-            </form>
+    {% if not listing.active %}
+        <div class="winner alert alert-success">
+            {% if listing.winner %}
+                <span><strong>{{ listing.winner.username }}</strong> has won the auction!!</span>
+            {% endif %}
+            <span>The listing is no longer available.</span>
         </div>
     {% endif %}
-    <div class="details">
-        <h5>Details:</h5>
-        <ul>
-            <li>Listed by: {{ listing.user }}</li>
-            <li>Category:
-                {% if listing.category %}
-                    {{ listing.category }}
-                {% else %}
-                    No category selected.
-                {% endif %}
-            </li>
-        </ul>
+    <div class="listing-details">
+        <div class="image-container-large"><img src="{{ listing.image }}"></div>
+        <p>{{ listing.description }}</p>
+        <p><big>${{ listing.price }}</big></p>
+        {% if user.is_authenticated and listing.active and not own_listing %}
+            <div class="form">
+                <small>{{ bid_count }} bid(s) so far. Your bid is the current bid</small>
+                <form action="{% url 'listing' listing.id %}" method="post">
+                    {% csrf_token %}
+                    {% for field in bid_form %}
+                        <div class="fieldWrapper">
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                    {% endfor %}
+                    <input type="submit" value="Place Bid">
+                </form>
+            </div>
+        {% endif %}
+        <div class="details">
+            <h5>Details</h5>
+            <ul>
+                <li>Listed by: <span>{{ listing.user }}</span></li>
+                <li>Category:
+                    {% if listing.category %}
+                        {{ listing.category }}
+                    {% else %}
+                        No category selected.
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="comments-section">
+        <h5>Comments</h5>
+        {% if user.is_authenticated %}
+            <div class="comment-form">
+                <form action="{% url 'post_comments' listing.id %}" method="post">
+                    {% csrf_token %}
+                    {% for field in comment_form %}
+                        <div class="fieldWrapper">
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                    {% endfor %}
+                    <input type="submit" value="Post Your Comment">            
+                </form>
+            </div>
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> or <a href="{% url 'register' %}">Register</a> to post your comment.</p>
+        {% endif %}
+        <div class="comment-list">
+            <ul>
+                {% for comment in comments %}
+                    <li>
+                        <p><strong>{{ comment.user.username }}</strong> commented on <span>{{ comment.created_at.date }}</span> at <span>{{ comment.created_at.time }}</span></p>
+                        <p>{{ comment.text }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 {% endblock %}

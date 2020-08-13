@@ -5,13 +5,13 @@ from django.shortcuts import render
 from django.urls import reverse
 from datetime import datetime
 
-from .models import User, Listing, ListingForm, Bid, BidForm, Category, Watchlist
+from .models import User, Listing, ListingForm, Bid, BidForm, Category, Watchlist, Comment, CommentForm
 
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all(),
-        "count": Listing.objects.all().count(),
+        "listings": Listing.objects.filter(active=True),
+        "count": Listing.objects.filter(active=True).count(),
         "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else ""
     })
 
@@ -71,20 +71,29 @@ def listings(request):
 
 def create_listing(request):
     if request.method == "POST":
-        listing = Listing()
-        listing.title = request.POST["title"]
-        listing.description = request.POST["description"]
-        listing.starting_bid = request.POST["starting_bid"]
-        listing.image = request.POST["image"]
-        listing.user = request.user
-        if request.POST["category"]:
-            listing.category = Category.objects.get(id=request.POST["category"])
-        listing.save()
-        return HttpResponseRedirect(reverse("listing", args=[listing.id]))
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            listing = Listing()
+            listing.title = form.cleaned_data["title"]
+            listing.description = form.cleaned_data["description"]
+            listing.starting_bid = form.cleaned_data["starting_bid"]
+            listing.created_at = datetime.now()
+            listing.price = listing.starting_bid
+            listing.image = form.cleaned_data["image"]
+            listing.user = request.user
+            if form.cleaned_data["category"]:
+                listing.category = form.cleaned_data["category"]
+            listing.save()
+            return HttpResponseRedirect(reverse("listing", args=[listing.id]))
+        else:
+            return render(request, "auctions/create_listing.html", {
+                "form": form,
+                "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else ""
+            })
     else:
         return render(request, "auctions/create_listing.html", {
             "form": ListingForm,
-            "watchlist_count": request.user.watchlist.all().count()
+            "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else ""
         })
 
 def in_watchlist(user, listing):
@@ -110,24 +119,37 @@ def listing(request, listing_id):
     try:
         listing = Listing.objects.get(id=listing_id)
         if request.method == "POST":
-            bid_amount = int(request.POST["bid_amount"])
-            if bid_amount >= listing.starting_bid and bid_amount >= listing.price:
+            form = BidForm(request.POST, listing_id=listing_id)
+            if form.is_valid():
                 bid = Bid()
-                bid.bid_amount = bid_amount
+                bid.bid_amount = form.cleaned_data["bid_amount"]
                 bid.user = request.user
                 bid.listing = listing
                 bid.save()
-                listing.price = bid_amount
+                listing.price = form.cleaned_data["bid_amount"]
                 listing.save()
+            else:
+                return render(request, "auctions/listing.html", {
+                    "bid_form": form,
+                    "listing": listing,
+                    "bid_count": listing.bids.all().count(),
+                    "in_watchlist": in_watchlist(user=request.user, listing=listing),
+                    "own_listing": own_listing(user=request.user, listing=listing),
+                    "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else "",
+                    "comments": listing.comments.order_by("-created_at"),
+                    "comment_form": CommentForm
+                })
     except Listing.DoesNotExist:
         raise Http404("Listing not found.")
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "bid_count": listing.bids.all().count(),
-        "form": BidForm,
+        "bid_form": BidForm(listing_id=listing_id),
+        "comment_form": CommentForm,
         "in_watchlist": in_watchlist(user=request.user, listing=listing),
         "own_listing": own_listing(user=request.user, listing=listing),
-        "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else ""
+        "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else "",
+        "comments": listing.comments.order_by("-created_at")
     })
 
 def categories(request):
@@ -139,8 +161,8 @@ def categories(request):
 def category(request, category_id):
     return render(request, "auctions/category.html", {
         "name": Category.objects.get(id=category_id),
-        "listings": Listing.objects.filter(category=category_id),
-        "count": Listing.objects.filter(category=category_id).count(),
+        "listings": Listing.objects.filter(category=category_id, active=True),
+        "count": Listing.objects.filter(category=category_id, active=True).count(),
         "watchlist_count": request.user.watchlist.all().count() if request.user.is_authenticated else ""
     })
 
@@ -163,7 +185,8 @@ def watchlist(request):
     watchlist = user.watchlist.all()
     listing = []
     for i in watchlist:
-        listing.append(i.listing)
+        if i.listing.active == True:
+            listing.append(i.listing)
     return render(request, "auctions/watchlist.html", {
         "listings": listing,
         "count": len(listing),
@@ -174,10 +197,25 @@ def close_listing(request, listing_id):
     if request.method == "POST":
         listing = Listing.objects.get(id=listing_id)
         if own_listing(request.user, listing):
-            highest_bid = Bid.objects.get(bid_amount=listing.price)
-            highest_bidder = highest_bid.user
-            highest_bid.winner = True
+            highest_bid = listing.bids.all().order_by('bid_amount').last()
+
+            if highest_bid:
+                highest_bidder = highest_bid.user
+                listing.winner = highest_bidder
+
             listing.active = False
-            highest_bid.save()
             listing.save()
+    return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+
+def post_comments(request, listing_id):
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = Comment()
+            comment.text = form.cleaned_data["text"]
+            comment.user = request.user
+            comment.listing = Listing.objects.get(id=listing_id)
+            comment.created_at = datetime.now()
+            comment.save()
+
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))

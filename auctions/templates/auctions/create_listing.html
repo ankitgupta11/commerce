@@ -7,7 +7,7 @@
 {% block body %}
     <h2>Create New Listing</h2>
 
-    <div class="form">
+    <div class="form create-listing">
         <form action="{% url 'create_listing' %}" method="post">
             {% csrf_token %}
             {% for field in form %}
