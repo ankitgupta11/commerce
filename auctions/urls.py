@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import RedirectView
 
 from . import views
 
@@ -17,5 +18,6 @@ urlpatterns = [
     path("close_listing/<int:listing_id>", views.close_listing, name="close_listing"),
     path("listings/new", views.create_listing, name="create_listing"),
     path("listings/<int:listing_id>", views.listing, name="listing"),
-    path("post_comments/<int:listing_id>", views.post_comments, name="post_comments")
+    path("post_comments/<int:listing_id>", views.post_comments, name="post_comments"),
+    re_path(r'^.*$', RedirectView.as_view(url='listings', permanent=False))
 ]

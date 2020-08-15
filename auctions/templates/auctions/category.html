@@ -1,5 +1,9 @@
 {% extends "auctions/layout.html" %}
 
+{% block title %}
+    Category - {{ name }}
+{% endblock %}
+
 {% block body %}
     <h2>Category - {{ name }}</h2>
     {% if count %}

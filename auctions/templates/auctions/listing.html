@@ -1,11 +1,11 @@
 {% extends "auctions/layout.html" %}
 
 {% block title %}
-    Listing
+    Listing : {{ listing.title }}
 {% endblock %}
 
 {% block body %}
-    <h2>Listing : {{ listing.title }}
+    <h2>{{ listing.title }}
     {% if own_listing and listing.active %}
         <div class="close-listing">
             <span>{{ bid_count }} bid(s) so far.</span>

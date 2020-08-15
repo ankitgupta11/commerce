@@ -169,6 +169,7 @@ input[type="submit"]:focus, input[type="text"]:focus {
 
 .section .details span {
 	color: #007bff;
+	text-transform: capitalize;
 }
 
 .winner {

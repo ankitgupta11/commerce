@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.urls import reverse
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 
 from .models import User, Listing, ListingForm, Bid, BidForm, Category, Watchlist, Comment, CommentForm
 
@@ -26,6 +27,8 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
+            if request.POST["next"]:
+                return HttpResponseRedirect(reverse(request.POST["next"].strip("/")))
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/login.html", {
@@ -182,6 +185,7 @@ def toggle_watchlist(request, listing_id):
             w.save()
     return HttpResponseRedirect(reverse("listing", args=[listing_id]))
 
+@login_required(login_url='/login')
 def watchlist(request):
     user = request.user
     watchlist = user.watchlist.all()
